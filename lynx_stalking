@@ -39,6 +39,10 @@ def dumpinfo(data):
 	prGreen("[0] Data de abertura: " + data['abertura'])
 	prGreen("[$] Capital social: " + data['capital_social'])
 	prGreen("[^] Outros nomes: " + data['fantasia'])
+	if(data['email']):
+		prGreen("[@] Email: " + data['email'])
+	if(data['telefone']):
+		prGreen("[5] Telefone: " + data['telefone'])
 	if(len(data['qsa']) > 0):
 		prGreen("[>] Pessoas:")
 		for pessoa in data['qsa']:
@@ -50,6 +54,8 @@ def dumpinfo(data):
 	prGreen("\t [+] CEP: " + data['cep'])
 	prGreen("\t [+] Bairro: " + data['bairro'])
 	prGreen("\t [+] Logradouro: " + data['logradouro'].encode('utf-8') + " N° " + data['numero'].encode('utf-8'))
+	if(data['complemento']):
+		prGreen("\t [+] Complemento: " + data['complemento'])
 
 	if(len(data['atividades_secundarias']) > 0):
 		prGreen("[>] Atividades Secundárias:")
@@ -108,6 +114,10 @@ def boot():
 						hosp_cnpj = re.sub('[^A-Za-z0-9]+', '', hosp.ownerid)
 						hosp_cnpj = retirarcaracteres(hosp_cnpj)
 						buscainfo(hosp_cnpj)
+						if type(hosp['email']) is list:
+	                                        	prGreen("[@] Email's: ")
+	                                        	for email in inf['email']:
+	                                                	prGreen("\t: [+] Email: " + email)
 					else:
 						prRed('[X] Sem informações de hospedagem')
 			except:
