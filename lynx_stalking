@@ -32,14 +32,24 @@ def banner():
 banner()
 
 def dumpinfo(data):
-	print("\n")
 	prGreen("[?] Status: " + data['status'])
 	prGreen("[!] CNPJ: " + data['cnpj'])
+	prGreen("[T] Tipo: " + data['tipo'])
 	prGreen("[A] Nome: " + data['nome'])
 	prGreen("[0] Data de abertura: " + data['abertura'])
 	prGreen("[$] Capital social: " + data['capital_social'])
 	prGreen("[^] Outros nomes: " + data['fantasia'])
+	if(len(data['qsa']) > 0):
+		prGreen("[>] Pessoas:")
+		for pessoa in data['qsa']:
+			prGreen("\t [+] Nome: " + pessoa['nome'].encode('utf-8') + " <> " + pessoa['qual'].encode('utf-8'))
 	prGreen("[>] Atividade: " + data['atividade_principal'][0]['text'].encode('utf-8'))
+	prGreen("[>] Localização: ")
+	prGreen("\t [+] Estado: " + data['uf'])
+	prGreen("\t [+] Municipio: " + data['municipio'])
+	prGreen("\t [+] CEP: " + data['cep'])
+	prGreen("\t [+] Bairro: " + data['bairro'])
+	prGreen("\t [+] Logradouro: " + data['logradouro'].encode('utf-8') + " N° " + data['numero'].encode('utf-8'))
 
 	if(len(data['atividades_secundarias']) > 0):
 		prGreen("[>] Atividades Secundárias:")
@@ -69,11 +79,38 @@ def boot():
 
 	else:
 		prYellow("[~] Buscando informações sobre: %s"%(sys.argv[1]))
-		inf = whois.whois(sys.argv[1])
-		if(inf.ownerif == "None"):
+		try:
+			inf = whois.whois(sys.argv[1])
+		except:
+			prRed("[X] Ops, Tivemos problemas para encontrar o domínio, tente novamente!")
+			exit()
+		if not inf['status']:
 			prRed("[X] Ops, parece que esse domínio não existe!")
+			exit()
 		else:
-			cnpj = re.sub('[^A-Za-z0-9]+', '', inf.ownerid)
-			cnpj = retirarcaracteres(cnpj)
-			buscainfo(cnpj)
+			try:
+				cnpj = re.sub('[^A-Za-z0-9]+', '', inf.ownerid)
+				cnpj = retirarcaracteres(cnpj)
+				buscainfo(cnpj)
+				if type(inf['email']) is list:
+					prGreen("[@] Email's: ")
+					for email in inf['email']:
+						prGreen("\t: [+] Email: " + email)
+				else:
+					prGreen("[@] Email: " + inf['email'])
+				prGreen("[+] ID de registro de domínio: %s"%(inf['owner_c']).encode('utf-8'))
+				hosp = whois.whois(inf['nserver'][0])
+				if(hosp.ownerif == "None"):
+					prRed("[X] Ops, Sem informações de hospedagem.")
+				else:
+					if(hosp['status']):
+						prLightGray("\n[+] Informações sobre hospedagem de domínio [+]")
+						hosp_cnpj = re.sub('[^A-Za-z0-9]+', '', hosp.ownerid)
+						hosp_cnpj = retirarcaracteres(hosp_cnpj)
+						buscainfo(hosp_cnpj)
+					else:
+						prRed('[X] Sem informações de hospedagem')
+			except:
+				prRed("[X] Ops, Tivemos problemas para idenfificar dados de %s"%sys.argv[1])
+				prYellow("[!] Use apenas domínios nacionais, caso seja nacional teste novamente mais tarde!")
 boot()
